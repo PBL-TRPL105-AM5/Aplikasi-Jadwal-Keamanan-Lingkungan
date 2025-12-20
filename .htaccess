@@ -1,0 +1,7 @@
+RewriteEngine On
+
+# Jika mengakses folder root langsung → arahkan ke landing_page.php
+RewriteRule ^$ landing_page.php [L]
+
+# Jika user akses index.php → juga arahkan ke landing_page.php
+RewriteRule ^index\.php$ landing_page.php [L]

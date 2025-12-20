@@ -1,0 +1,10 @@
+# CONFIG RAHASIA
+/config/config.php
+/config/email_config.php
+
+# ENV & LOG
+.env
+*.log
+
+# OPTIONAL: vendor (kalau mau install via composer)
+# assets/vendor/
