@@ -32,8 +32,7 @@ Aplikasi ini membantu pengelolaan keamanan lingkungan agar lebih terstruktur, te
 1. Clone repository ke dalam folder web server:
    
 2. Masuk ke folder project:
-   ```bash
-   cd Aplikasi-Jadwal-Keamanan-Lingkungan
+
 3. Salin file konfigurasi contoh:
    ```bash
    cp config/config.example.php config/config.php
