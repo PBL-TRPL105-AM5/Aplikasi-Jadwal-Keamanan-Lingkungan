@@ -30,8 +30,7 @@ Aplikasi ini membantu pengelolaan keamanan lingkungan agar lebih terstruktur, te
 ## ⚙️ Instalasi
 
 1. Clone repository ke dalam folder web server:
-   ```bash
-   git clone https://github.com/username/Aplikasi-Jadwal-Keamanan-Lingkungan.git
+   
 2. Masuk ke folder project:
    ```bash
    cd Aplikasi-Jadwal-Keamanan-Lingkungan
