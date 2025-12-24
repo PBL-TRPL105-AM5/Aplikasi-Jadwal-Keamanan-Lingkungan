@@ -1,21 +1,22 @@
 <?php
 include '../config/config.php';
 
+// Cek login dan role Admin
 if (!isset($_SESSION['user']) || $_SESSION['user']['role'] != 'Admin') {
     header("Location: ../login.php");
     exit;
 }
 
+// Ambil data user dari session
 $user = $_SESSION['user'];
 
 
-// ========================
-//  DATA STATISTIK
-// ========================
+// Hitung total petugas
 $total_petugas = mysqli_fetch_assoc(
     mysqli_query($conn, "SELECT COUNT(*) AS total FROM tb_pengguna WHERE role='Petugas'")
 )['total'];
 
+// Hitung total jadwal bulan ini
 $total_jadwal = mysqli_fetch_assoc(
     mysqli_query($conn, "
         SELECT COUNT(*) AS total FROM tb_jadwal 
@@ -24,30 +25,33 @@ $total_jadwal = mysqli_fetch_assoc(
     ")
 )['total'];
 
+// Hitung total insiden
 $total_insiden = mysqli_fetch_assoc(
     mysqli_query($conn, "SELECT COUNT(*) AS total FROM tb_insiden")
 )['total'];
 
+// Hitung total presensi hadir
 $total_hadir = mysqli_fetch_assoc(
     mysqli_query($conn, "SELECT COUNT(*) AS total FROM tb_presensi WHERE status='hadir'")
 )['total'];
 
+// Hitung total seluruh presensi
 $total_presensi = mysqli_fetch_assoc(
     mysqli_query($conn, "SELECT COUNT(*) AS total FROM tb_presensi")
 )['total'];
 
+// Hitung persentase rata-rata kehadiran
 $avg_kehadiran = ($total_presensi > 0) ? round(($total_hadir / $total_presensi) * 100) : 0;
 
 
-// ========================
-//  DATA GRAFIK BULANAN
-// ========================
+// Nama bulan untuk grafik
 $bulan_fix = ["Jan","Feb","Mar","Apr","Mei","Jun","Jul","Agu","Sep","Okt","Nov","Des"];
 
+// Inisialisasi data grafik
 $data_jadwal = array_fill(0, 12, 0);
 $data_hadir = array_fill(0, 12, 0);
 
-// JADWAL
+// Ambil data jadwal per bulan
 $q_jadwal = mysqli_query($conn, "
     SELECT MONTH(tanggal_tugas) AS bulan, COUNT(*) AS total
     FROM tb_jadwal
@@ -59,7 +63,7 @@ while ($row = mysqli_fetch_assoc($q_jadwal)) {
     $data_jadwal[((int)$row['bulan']) - 1] = (int)$row['total'];
 }
 
-// KEHADIRAN
+// Ambil data kehadiran per bulan
 $q_hadir_bulan = mysqli_query($conn, "
     SELECT MONTH(j.tanggal_tugas) AS bulan, COUNT(p.id_absen) AS total
     FROM tb_presensi p
@@ -73,6 +77,7 @@ while ($row = mysqli_fetch_assoc($q_hadir_bulan)) {
     $data_hadir[((int)$row['bulan']) - 1] = (int)$row['total'];
 }
 
+// Set judul halaman dan load template
 $page_title = "Dashboard Admin | Siskamling";
 include '../templates/header.php';
 include '../templates/sidebar.php';
@@ -93,70 +98,64 @@ include '../templates/sidebar.php';
 
     <h1 class="h3 mb-4 fw-bold">Dashboard Admin</h1>
 
-    <!-- STATISTIK -->
     <div class="row g-3">
 
-        <!-- TOTAL PETUGAS -->
         <div class="col-md-3">
             <div class="p-3 bg-white shadow-sm stat-card">
-            <div class="d-flex align-items-center gap-3">
-                <i class="fa fa-users text-primary" style="font-size:32px;"></i>
-                <div>
-                <div class="text-primary fs-3 fw-bold"><?= $total_petugas ?></div>
-                <div class="text-muted small">Total Petugas</div>
+                <div class="d-flex align-items-center gap-3">
+                    <i class="fa fa-users text-primary" style="font-size:32px;"></i>
+                    <div>
+                        <div class="text-primary fs-3 fw-bold"><?= $total_petugas ?></div>
+                        <div class="text-muted small">Total Petugas</div>
+                    </div>
                 </div>
-            </div>
             </div>
         </div>
 
-        <!-- JADWAL BULAN INI -->
         <div class="col-md-3">
             <div class="p-3 bg-white shadow-sm stat-card">
-            <div class="d-flex align-items-center gap-3">
-                <i class="fa fa-calendar text-success" style="font-size:32px;"></i>
-                <div>
-                <div class="text-success fs-3 fw-bold"><?= $total_jadwal ?></div>
-                <div class="text-muted small">Jadwal Bulan Ini</div>
+                <div class="d-flex align-items-center gap-3">
+                    <i class="fa fa-calendar text-success" style="font-size:32px;"></i>
+                    <div>
+                        <div class="text-success fs-3 fw-bold"><?= $total_jadwal ?></div>
+                        <div class="text-muted small">Jadwal Bulan Ini</div>
+                    </div>
                 </div>
-            </div>
             </div>
         </div>
 
-        <!-- TOTAL INSIDEN -->
         <div class="col-md-3">
             <div class="p-3 bg-white shadow-sm stat-card">
-            <div class="d-flex align-items-center gap-3">
-                <i class="fa fa-exclamation-triangle text-warning" style="font-size:32px;"></i>
-                <div>
-                <div class="text-warning fs-3 fw-bold"><?= $total_insiden ?></div>
-                <div class="text-muted small">Total Insiden</div>
+                <div class="d-flex align-items-center gap-3">
+                    <i class="fa fa-exclamation-triangle text-warning" style="font-size:32px;"></i>
+                    <div>
+                        <div class="text-warning fs-3 fw-bold"><?= $total_insiden ?></div>
+                        <div class="text-muted small">Total Insiden</div>
+                    </div>
                 </div>
-            </div>
             </div>
         </div>
 
-        <!-- RATA-RATA KEHADIRAN -->
         <div class="col-md-3">
             <div class="p-3 bg-white shadow-sm stat-card">
-            <div class="d-flex align-items-center gap-3">
-                <i class="fa fa-chart-line text-danger" style="font-size:32px;"></i>
-                <div>
-                <div class="text-danger fs-3 fw-bold"><?= $avg_kehadiran ?>%</div>
-                <div class="text-muted small">Rata-rata Kehadiran</div>
+                <div class="d-flex align-items-center gap-3">
+                    <i class="fa fa-chart-line text-danger" style="font-size:32px;"></i>
+                    <div>
+                        <div class="text-danger fs-3 fw-bold"><?= $avg_kehadiran ?>%</div>
+                        <div class="text-muted small">Rata-rata Kehadiran</div>
+                    </div>
                 </div>
-            </div>
             </div>
         </div>
 
     </div>
 
-
-
-    <!-- GRAFIK -->
     <div class="row mt-4">
         <div class="col-lg-12">
             <div class="p-4 bg-white shadow-sm rounded">
-                <h5 class="mb-3 fw-bold"><i class="bi bi-bar-chart"></i> Grafik Jadwal & Kehadiran per Bulan</h5>
+                <h5 class="mb-3 fw-bold">
+                    <i class="bi bi-bar-chart"></i> Grafik Jadwal & Kehadiran per Bulan
+                </h5>
                 <canvas id="chartBulan" height="130"></canvas>
             </div>
         </div>
@@ -169,9 +168,7 @@ include '../templates/sidebar.php';
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
-// ===========================
-// BAR CHART INTERAKTIF + ANIMASI
-// ===========================
+// Membuat grafik bar jadwal dan kehadiran
 new Chart(document.getElementById('chartBulan'), {
     type: 'bar',
     data: {

@@ -1,30 +1,38 @@
 <?php
 include '../config/config.php';
 
+// Mengecek apakah user sudah login
 if (!isset($_SESSION['user'])) {
     header("Location: ../login.php");
     exit;
 }
 
+// Mengecek apakah role adalah Koordinator
+if ($_SESSION['user']['role'] !== 'Koordinator') {
+    header("Location: ../login.php");
+    exit;
+}
+
+// Mengambil data user dari session
 $user = $_SESSION['user'];
 $id_pengguna = $user['id_pengguna'];
 
+// Menentukan judul halaman
 $page_title = "Dashboard Koordinator | Siskamling";
+
+// Memanggil template header dan sidebar
 include '../templates/header.php';
 include '../templates/sidebar.php';
 
-
-// ===============================
-// AMBIL DATA DARI DATABASE
-// ===============================
-
-// total petugas
+// Mengambil jumlah total petugas
 $total_petugas = mysqli_fetch_assoc(mysqli_query($conn,"
     SELECT COUNT(*) AS total FROM tb_pengguna WHERE role='Petugas'
 "))['total'];
 
-// presensi hari ini
+// Menyimpan tanggal hari ini
 $tgl_hari_ini = date('Y-m-d');
+
+// Menghitung jumlah petugas yang hadir hari ini
 $presensi_hari_ini = mysqli_fetch_assoc(mysqli_query($conn,"
     SELECT COUNT(*) AS total FROM tb_presensi pr
     JOIN tb_jadwal j ON j.id_jadwal = pr.id_jadwal
@@ -32,12 +40,12 @@ $presensi_hari_ini = mysqli_fetch_assoc(mysqli_query($conn,"
     AND pr.status = 'hadir'
 "))['total'];
 
-// total insiden
+// Mengambil jumlah total laporan insiden
 $total_insiden = mysqli_fetch_assoc(mysqli_query($conn,"
     SELECT COUNT(*) AS total FROM tb_insiden
 "))['total'];
 
-// jadwal hari ini
+// Mengambil jadwal ronda yang berlangsung hari ini
 $jadwal_hari_ini = mysqli_query($conn,"
     SELECT j.*, p.nama_pengguna
     FROM tb_jadwal j
@@ -47,16 +55,15 @@ $jadwal_hari_ini = mysqli_query($conn,"
 ");
 ?>
 
+
 <div class="container-fluid py-3">
 
     <h1 class="h3 mb-4">Dashboard Koordinator</h1>
 
-    <!-- ===================== -->
-    <!-- STATISTIK -->
-    <!-- ===================== -->
+    <!-- Menampilkan statistik ringkas -->
     <div class="row g-3 mb-4">
 
-        <!-- TOTAL PETUGAS -->
+        <!-- Statistik total petugas -->
         <div class="col-md-4">
             <div class="p-3 bg-white shadow-sm stat-card">
                 <div class="d-flex align-items-center gap-3">
@@ -73,7 +80,7 @@ $jadwal_hari_ini = mysqli_query($conn,"
             </div>
         </div>
 
-        <!-- PRESENSI HARI INI -->
+        <!-- Statistik presensi hari ini -->
         <div class="col-md-4">
             <div class="p-3 bg-white shadow-sm stat-card">
                 <div class="d-flex align-items-center gap-3">
@@ -90,7 +97,7 @@ $jadwal_hari_ini = mysqli_query($conn,"
             </div>
         </div>
 
-        <!-- LAPORAN INSIDEN -->
+        <!-- Statistik laporan insiden -->
         <div class="col-md-4">
             <div class="p-3 bg-white shadow-sm stat-card">
                 <div class="d-flex align-items-center gap-3">
@@ -109,13 +116,9 @@ $jadwal_hari_ini = mysqli_query($conn,"
 
     </div>
 
-
-
     <div class="row g-4">
 
-        <!-- ===================== -->
-        <!-- JADWAL HARI INI -->
-        <!-- ===================== -->
+        <!-- Daftar jadwal ronda hari ini -->
         <div class="col-lg-8">
             <div class="p-4 bg-white shadow-sm rounded">
                 <h5><i class="bi bi-calendar-check"></i> Jadwal Ronda Hari Ini</h5>
@@ -148,6 +151,7 @@ $jadwal_hari_ini = mysqli_query($conn,"
                     <p class="text-muted">Tidak ada jadwal ronda hari ini.</p>
                 <?php endif; ?>
 
+                <!-- Tombol menuju halaman presensi -->
                 <div class="text-center mt-3">
                     <a href="../presensi/index.php" class="btn btn-primary">
                         <i class="bi bi-check-square"></i> Kelola Presensi
@@ -157,12 +161,8 @@ $jadwal_hari_ini = mysqli_query($conn,"
             </div>
         </div>
 
-
-        <!-- ===================== -->
-        <!-- AKSI CEPAT -->
-        <!-- ===================== -->
+        <!-- Menu aksi cepat -->
         <div class="col-lg-4">
-
             <div class="p-4 bg-white shadow-sm rounded mb-3">
                 <h5><i class="bi bi-lightning"></i> Aksi Cepat</h5>
 
@@ -180,7 +180,7 @@ $jadwal_hari_ini = mysqli_query($conn,"
             </div>
         </div>
 
-        <!-- INFO BOX -->
+        <!-- Informasi pengingat -->
         <div class="alert alert-info">
             <i class="bi bi-info-circle"></i>
             Pastikan seluruh petugas melakukan presensi sesuai jadwal.

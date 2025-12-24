@@ -145,7 +145,7 @@ if (isset($_SESSION['user'])) {
                   </p>
                 <?php endforeach; ?>
               <?php else: ?>
-                <p class="mb-1 small text-muted fst-italic">
+                <p class="mb-1 small fst-italic fw-bold">
                   Belum ada jadwal
                 </p>
               <?php endif; ?>

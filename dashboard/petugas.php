@@ -1,23 +1,24 @@
 <?php
 include '../config/config.php';
 
+// Mengecek apakah user sudah login
 if (!isset($_SESSION['user'])) {
     header("Location: ../login.php");
     exit;
 }
 
+// Mengambil data user dari session
 $user = $_SESSION['user'];
 $id_pengguna = $user['id_pengguna'];
 
+// Menentukan judul halaman dashboard petugas
 $page_title = "Dashboard Petugas | Siskamling";
+
+// Memanggil template header dan sidebar
 include '../templates/header.php';
 include '../templates/sidebar.php';
 
-/* ======================================================
-   === AMBIL DATA STATISTIK ===
-   ====================================================== */
-
-// total jadwal bulan ini
+// Mengambil total jadwal petugas pada bulan berjalan
 $bulan = date('Y-m');
 $jadwal_bulan = mysqli_fetch_assoc(mysqli_query($conn,"
     SELECT COUNT(*) AS total FROM tb_jadwal
@@ -25,7 +26,7 @@ $jadwal_bulan = mysqli_fetch_assoc(mysqli_query($conn,"
     AND DATE_FORMAT(tanggal_tugas,'%Y-%m') = '$bulan'
 "))['total'];
 
-// total hadir
+// Mengambil total kehadiran petugas
 $hadir = mysqli_fetch_assoc(mysqli_query($conn,"
     SELECT COUNT(*) AS total 
     FROM tb_presensi pr
@@ -34,16 +35,13 @@ $hadir = mysqli_fetch_assoc(mysqli_query($conn,"
       AND pr.status = 'hadir'
 "))['total'];
 
-// total insiden dicatat
+// Mengambil total insiden yang dicatat oleh petugas
 $insiden = mysqli_fetch_assoc(mysqli_query($conn,"
     SELECT COUNT(*) AS total FROM tb_insiden
     WHERE id_pengguna = '$id_pengguna'
 "))['total'];
 
-/* ======================================================
-   === JADWAL TERDEKAT (1 JADWAL SAJA)
-   ====================================================== */
-
+// Mengambil satu jadwal terdekat yang belum dimulai
 $next_one = mysqli_fetch_assoc(mysqli_query($conn,"
     SELECT *, CONCAT(tanggal_tugas,' ',jam_mulai) AS mulai 
     FROM tb_jadwal
@@ -53,10 +51,7 @@ $next_one = mysqli_fetch_assoc(mysqli_query($conn,"
     LIMIT 1
 "));
 
-/* ======================================================
-   === RIWAYAT PRESENSI
-   ====================================================== */
-
+// Mengambil riwayat presensi terakhir petugas
 $riwayat = mysqli_query($conn,"
     SELECT j.tanggal_tugas, pr.status 
     FROM tb_presensi pr
@@ -98,12 +93,9 @@ $riwayat = mysqli_query($conn,"
 
     <h1 class="h3 mb-4">Dashboard Petugas</h1>
 
-    <!-- ===================== -->
-    <!-- STATISTIK -->
-    <!-- ===================== -->
+    <!-- Menampilkan statistik utama petugas -->
     <div class="row g-3 mb-4">
 
-        <!-- JADWAL BULAN INI -->
         <div class="col-md-4">
             <div class="p-3 bg-white shadow-sm rounded">
                 <div class="d-flex align-items-center gap-3">
@@ -120,7 +112,6 @@ $riwayat = mysqli_query($conn,"
             </div>
         </div>
 
-        <!-- KEHADIRAN -->
         <div class="col-md-4">
             <div class="p-3 bg-white shadow-sm rounded">
                 <div class="d-flex align-items-center gap-3">
@@ -137,7 +128,6 @@ $riwayat = mysqli_query($conn,"
             </div>
         </div>
 
-        <!-- INSIDEN DICATAT -->
         <div class="col-md-4">
             <div class="p-3 bg-white shadow-sm rounded">
                 <div class="d-flex align-items-center gap-3">
@@ -156,12 +146,9 @@ $riwayat = mysqli_query($conn,"
 
     </div>
 
-
-    <!-- ===================== -->
-    <!-- JADWAL TERDEKAT + TIMER -->
-    <!-- ===================== -->
     <div class="row g-4">
 
+        <!-- Menampilkan jadwal ronda terdekat beserta hitung mundur -->
         <div class="col-lg-8">
             <div class="p-4 bg-white shadow-sm rounded">
 
@@ -172,18 +159,18 @@ $riwayat = mysqli_query($conn,"
                     <div class="schedule-item mb-3">
                         <div class="schedule-title">Ronda Malam Berikutnya</div>
                         <div class="schedule-info mt-2">
-                            <div><i class="bi bi-calendar3"></i> 
+                            <div>
+                                <i class="bi bi-calendar3"></i> 
                                 <?= date("d M Y", strtotime($next_one['tanggal_tugas'])) ?>
                             </div>
-                            <div><i class="bi bi-clock"></i> 
+                            <div>
+                                <i class="bi bi-clock"></i> 
                                 <?= substr($next_one['jam_mulai'],0,5) ?> WIB
                             </div>
                         </div>
                     </div>
 
-                    <?php 
-                        $target = $next_one['mulai']; 
-                    ?>
+                    <?php $target = $next_one['mulai']; ?>
 
                     <div class="countdown-box p-3 mt-3 text-center bg-light border rounded">
                         <h6 class="mb-1 text-muted">Hitung Mundur</h6>
@@ -227,9 +214,7 @@ $riwayat = mysqli_query($conn,"
             </div>
         </div>
 
-        <!-- ===================== -->
-        <!-- AKSI CEPAT -->
-        <!-- ===================== -->
+        <!-- Menu aksi cepat dan riwayat kehadiran -->
         <div class="col-lg-4">
 
             <div class="p-4 bg-white shadow-sm rounded mb-3">
@@ -255,9 +240,13 @@ $riwayat = mysqli_query($conn,"
                             <span><b><?= date('d M', strtotime($r['tanggal_tugas'])) ?></b></span>
 
                             <?php if ($r['status'] == 'hadir'): ?>
-                                <span class="text-success"><i class="bi bi-check-circle-fill"></i> Hadir</span>
+                                <span class="text-success">
+                                    <i class="bi bi-check-circle-fill"></i> Hadir
+                                </span>
                             <?php else: ?>
-                                <span class="text-danger"><i class="bi bi-x-circle-fill"></i> Tidak Hadir</span>
+                                <span class="text-danger">
+                                    <i class="bi bi-x-circle-fill"></i> Tidak Hadir
+                                </span>
                             <?php endif; ?>
                         </div>
                     <?php endwhile; ?>

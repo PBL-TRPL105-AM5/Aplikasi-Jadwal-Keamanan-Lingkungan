@@ -36,7 +36,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['status'])) {
         }
 
         // Cek apakah sudah ada presensi sebelumnya
-        $cek = mysqli_query($conn, "SELECT id_absen FROM tb_presensi WHERE id_jadwal = $id_jadwal");
+        $cek = mysqli_query($conn, "SELECT id_absen FROM tb_presensi WHERE id_jadwal = $id_jadwal"); //Sistem mengecek apakah jadwal tersebut sudah memiliki data presensi.
 
         if (mysqli_num_rows($cek) > 0) {
             // UPDATE
@@ -47,13 +47,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['status'])) {
                     waktu_absen = NOW(),
                     dicatat_oleh = $dicatat_oleh
                 WHERE id_jadwal = $id_jadwal
-            ";
+            "; // Jika data presensi sudah ada, sistem akan memperbarui data tersebut dengan status, keterangan, waktu absen, dan siapa yang mencatatnya.
         } else {
-            // INSERT
             $sql = "
                 INSERT INTO tb_presensi (id_jadwal, status, keterangan, waktu_absen, dicatat_oleh)
                 VALUES ($id_jadwal, $status_sql, $keterangan_sql, NOW(), $dicatat_oleh)
-            ";
+            "; // Jika belum ada, sistem akan menambahkan data presensi baru dengan informasi yang diberikan.
         }
 
         mysqli_query($conn, $sql);
@@ -109,7 +108,7 @@ include __DIR__ . '/../templates/sidebar.php';
                 JOIN tb_pengguna p ON j.id_pengguna = p.id_pengguna
                 LEFT JOIN tb_presensi pr ON j.id_jadwal = pr.id_jadwal
                 WHERE j.tanggal_tugas = '$tanggal_safe'
-            ");
+            "); // Query ini menampilkan jadwal dan status presensi pada tanggal tertentu.
             ?>
 
 

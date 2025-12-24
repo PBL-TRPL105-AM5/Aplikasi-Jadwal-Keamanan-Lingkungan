@@ -1,15 +1,13 @@
 <?php
 include '../config/config.php';
 
-// Cek login
+// cek login
 if (!isset($_SESSION['user'])) {
     header("Location: ../login.php");
     exit;
 }
 
-// ==========================
-// AJAX DETAIL
-// ==========================
+// detail jadwal (ajax)
 if (isset($_GET['detail'])) {
     $id = intval($_GET['detail']);
 
@@ -18,7 +16,7 @@ if (isset($_GET['detail'])) {
         FROM tb_jadwal j
         LEFT JOIN tb_pengguna p ON j.id_pengguna = p.id_pengguna
         WHERE j.id_jadwal = $id
-    ");
+    "); // Query ini mengambil detail jadwal dari tabel tb_jadwal dan menghubungkannya dengan tabel tb_pengguna untuk menampilkan nama petugas.
     $jadwal = mysqli_fetch_assoc($q);
 
     $presensiQ = mysqli_query($conn, "
@@ -26,16 +24,15 @@ if (isset($_GET['detail'])) {
         FROM tb_presensi pr
         LEFT JOIN tb_pengguna u ON pr.dicatat_oleh = u.id_pengguna
         WHERE pr.id_jadwal = $id
-    ");
-    ?>
-
+    "); // Query ini menampilkan data presensi yang terkait dengan jadwal tertentu berdasarkan id_jadwal, serta menampilkan nama pengguna yang mencatat presensi.
+?>
     <div class="modal-header bg-primary text-white">
         <h5 class="modal-title">Detail Jadwal</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
     </div>
 
     <div class="modal-body">
-        <p><strong>Tanggal Tugas:</strong> <?= $jadwal['tanggal_tugas'] ?></p>
+        <p><strong>Tanggal:</strong> <?= $jadwal['tanggal_tugas'] ?></p>
         <p><strong>Petugas:</strong> <?= $jadwal['nama_pengguna'] ?></p>
         <p><strong>Jam:</strong> <?= substr($jadwal['jam_mulai'],0,5) ?> - <?= substr($jadwal['jam_selesai'],0,5) ?></p>
 
@@ -46,7 +43,7 @@ if (isset($_GET['detail'])) {
             <p class="text-muted">Belum ada presensi.</p>
         <?php else: ?>
             <table class="table table-bordered table-sm">
-                <thead class="table-light">
+                <thead>
                     <tr>
                         <th>Status</th>
                         <th>Keterangan</th>
@@ -71,18 +68,16 @@ if (isset($_GET['detail'])) {
     <div class="modal-footer">
         <button class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
     </div>
-
-    <?php exit;
+<?php
+    exit;
 }
 
-
-// ==========================
-// LIST JADWAL
-// ==========================
+// data user login
 $user = $_SESSION['user'];
 $role = $user['role'];
 $id_pengguna = $user['id_pengguna'];
 
+// list jadwal
 $sql = "
     SELECT j.id_jadwal, j.tanggal_tugas, j.jam_mulai, j.jam_selesai,
            p.nama_pengguna, pr.status AS status_presensi
@@ -95,18 +90,15 @@ if ($role === 'Petugas') {
     $sql .= " WHERE j.id_pengguna = $id_pengguna ";
 }
 
-$sql .= " ORDER BY j.tanggal_tugas ASC, p.nama_pengguna ASC";
+$sql .= " ORDER BY j.tanggal_tugas ASC";
 
 $result = mysqli_query($conn, $sql);
 
-
-// ==========================
-// TEMPLATE
-// ==========================
-$page_title = "Jadwal Ronda | Siskamling";
+$page_title = "Jadwal Ronda";
 include __DIR__ . '/../templates/header.php';
 include __DIR__ . '/../templates/sidebar.php';
 ?>
+
 
 <!-- STYLE: jadwal-box sama seperti buat.php -->
 <style>
@@ -116,11 +108,6 @@ include __DIR__ . '/../templates/sidebar.php';
     border-radius: 12px;
     border: 1px solid #ddd;
     margin-bottom: 25px;
-}
-
-/* MATIKAN HOVER */
-.table-hover tbody tr:hover {
-    background: transparent !important;
 }
 </style>
 
