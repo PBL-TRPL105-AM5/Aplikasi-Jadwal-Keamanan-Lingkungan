@@ -1,9 +1,7 @@
 <?php
 include '../config/config.php';
 
-// =========================
-//       SEARCH
-// =========================
+//SEARCH
 $search = "";
 if (isset($_GET['search']) && $_GET['search'] !== "") {
     $search = mysqli_real_escape_string($conn, $_GET['search']);
@@ -23,9 +21,6 @@ include __DIR__ . '/../templates/header.php';
 include __DIR__ . '/../templates/sidebar.php';
 ?>
 
-<!-- =========================
-        KONTEN
-========================= -->
 <div class="container-fluid">
 
     <h1 class="h3 mb-4 text-gray-800">Data Pengguna</h1>
@@ -141,9 +136,7 @@ include __DIR__ . '/../templates/sidebar.php';
 
 </div>
 
-<!-- =========================
-    MODAL DETAIL PENGGUNA
-========================= -->
+<!-- MODAL DETAIL PENGGUNA -->
 <div class="modal fade" id="modalDetail" tabindex="-1">
     <div class="modal-dialog modal-md">
         <div class="modal-content">
@@ -172,9 +165,8 @@ include __DIR__ . '/../templates/sidebar.php';
     </div>
 </div>
 
-<!-- =========================
-    MODAL TAMBAH
-========================= -->
+
+<!-- MODAL TAMBAH -->
 <div class="modal fade" id="modalTambah" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
@@ -245,9 +237,7 @@ include __DIR__ . '/../templates/sidebar.php';
     </div>
 </div>
 
-<!-- =========================
-    MODAL EDIT
-========================= -->
+<!-- MODAL EDIT -->
 <div class="modal fade" id="modalEdit" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
@@ -323,11 +313,9 @@ include __DIR__ . '/../templates/sidebar.php';
 
 <?php include '../templates/footer.php'; ?>
 
-<!-- =========================
-       JAVASCRIPT MODAL
-========================= -->
+<!-- JAVASCRIPT MODAL -->
 <script>
-// ========= DETAIL =========
+// DETAIL
 document.querySelectorAll('.btnDetail').forEach(btn => {
     btn.addEventListener('click', function() {
         document.getElementById('detail_nama').innerText = this.dataset.nama;
@@ -339,7 +327,7 @@ document.querySelectorAll('.btnDetail').forEach(btn => {
     });
 });
 
-// ========= EDIT =========
+// EDIT
 document.querySelectorAll('.btnEdit').forEach(btn => {
     btn.addEventListener('click', function() {
         document.getElementById('edit_id').value = this.dataset.id;

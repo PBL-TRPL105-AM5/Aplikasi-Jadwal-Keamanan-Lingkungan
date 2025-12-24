@@ -1,33 +1,39 @@
 <?php
+// Memanggil file konfigurasi utama (session, koneksi DB, base_url, dll)
 include __DIR__ . '/../config/config.php';
 
+// Proteksi halaman: redirect ke login jika belum login
 if (!isset($_SESSION['user'])) {
     header("Location: " . $base_url . "login.php");
     exit;
 }
 
+// Mengambil data user dari session
 $user = $_SESSION['user'];
-$nama = htmlspecialchars($user['nama_pengguna']);
-$role = $user['role'];
+$nama = htmlspecialchars($user['nama_pengguna']); // sanitasi untuk tampilan
+$role = $user['role']; // role user: Admin / Koordinator / Petugas
 
-// Deteksi URL aktif
+// Mengambil URL halaman saat ini untuk kebutuhan menu active
 $current_uri = $_SERVER['REQUEST_URI'];
 
-// Helper untuk active menu
+// Fungsi helper untuk menentukan menu aktif
+// Jika path ditemukan di URL, maka class "active" akan ditambahkan
 function isActive($path) {
     global $current_uri;
     return strpos($current_uri, $path) !== false ? 'active' : '';
 }
 ?>
 
-<!-- ================= NAVBAR ATAS ================= -->
+<!-- Navbar atas -->
 <nav class="navbar navbar-expand-lg navbar-dark">
     <div class="container-fluid">
 
+        <!-- Logo / brand aplikasi -->
         <a class="navbar-brand fw-bold" href="<?= $base_url ?>dashboard/index.php">
             <i class="bi bi-shield-check"></i> Siskamling
         </a>
 
+        <!-- Tombol toggle untuk tampilan mobile -->
         <button class="navbar-toggler" type="button"
                 data-bs-toggle="collapse"
                 data-bs-target="#navbarNav">
@@ -36,9 +42,10 @@ function isActive($path) {
 
         <div class="collapse navbar-collapse" id="navbarNav">
 
-            <!-- MENU MOBILE -->
+            <!-- Menu navigasi (mobile) -->
             <ul class="navbar-nav me-auto mobile-nav-menu">
 
+                <!-- Dashboard -->
                 <li class="nav-item">
                     <a class="nav-link <?= isActive('/dashboard/') ?>"
                        href="<?= $base_url ?>dashboard/index.php">
@@ -46,6 +53,7 @@ function isActive($path) {
                     </a>
                 </li>
 
+                <!-- Menu khusus Admin -->
                 <?php if ($role == 'Admin'): ?>
                     <li class="nav-item">
                         <a class="nav-link <?= isActive('/jadwal/') ?>"
@@ -73,6 +81,7 @@ function isActive($path) {
                     </li>
                 <?php endif; ?>
 
+                <!-- Menu khusus Koordinator -->
                 <?php if ($role == 'Koordinator'): ?>
                     <li class="nav-item">
                         <a class="nav-link <?= isActive('/jadwal/') ?>"
@@ -94,6 +103,7 @@ function isActive($path) {
                     </li>
                 <?php endif; ?>
 
+                <!-- Menu khusus Petugas -->
                 <?php if ($role == 'Petugas'): ?>
                     <li class="nav-item">
                         <a class="nav-link <?= isActive('/jadwal/') ?>"
@@ -110,7 +120,7 @@ function isActive($path) {
                 <?php endif; ?>
             </ul>
 
-            <!-- USER -->
+            <!-- Dropdown user (profil & logout) -->
             <ul class="navbar-nav ms-auto align-items-center">
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
@@ -137,10 +147,11 @@ function isActive($path) {
     </div>
 </nav>
 
-<!-- ================= SIDEBAR DESKTOP ================= -->
+<!-- Sidebar untuk tampilan desktop -->
 <div class="container-fluid">
     <div class="row">
 
+        <!-- Sidebar kiri -->
         <div class="col-md-3 col-lg-2 px-0 sidebar d-none d-md-block">
             <nav class="nav flex-column">
 
@@ -149,6 +160,7 @@ function isActive($path) {
                     <i class="bi bi-house-door"></i> Dashboard
                 </a>
 
+                <!-- Sidebar Admin -->
                 <?php if ($role == 'Admin'): ?>
                     <a class="nav-link <?= isActive('/jadwal/') ?>"
                        href="<?= $base_url ?>jadwal/index.php">
@@ -168,6 +180,7 @@ function isActive($path) {
                     </a>
                 <?php endif; ?>
 
+                <!-- Sidebar Koordinator -->
                 <?php if ($role == 'Koordinator'): ?>
                     <a class="nav-link <?= isActive('/jadwal/') ?>"
                        href="<?= $base_url ?>jadwal/index.php">
@@ -183,6 +196,7 @@ function isActive($path) {
                     </a>
                 <?php endif; ?>
 
+                <!-- Sidebar Petugas -->
                 <?php if ($role == 'Petugas'): ?>
                     <a class="nav-link <?= isActive('/jadwal/') ?>"
                        href="<?= $base_url ?>jadwal/index.php">
@@ -197,4 +211,5 @@ function isActive($path) {
             </nav>
         </div>
 
+        <!-- Area konten utama -->
         <div class="col-md-9 col-lg-10 p-4" id="mainContent">
