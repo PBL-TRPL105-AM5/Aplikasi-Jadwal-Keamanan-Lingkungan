@@ -122,6 +122,11 @@ function isActive($path) {
 
             <!-- Dropdown user (profil & logout) -->
             <ul class="navbar-nav ms-auto align-items-center">
+                <!-- Tanggal & Jam realtime -->
+                <li class="nav-item me-3 text-white fw-semibold d-none d-md-flex align-items-center">
+                    <i class="bi bi-clock me-1"></i>
+                    <span id="tanggalJamNavbar"> Senin, 29 April 2025, 21:34:08</span>
+                </li>
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
                         <i class="bi bi-person-circle"></i>

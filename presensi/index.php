@@ -22,17 +22,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['status'])) {
     // Loop setiap data presensi berdasarkan id_jadwal
     foreach ($_POST['status'] as $id_jadwal => $status) {
 
+        // Jika status tidak diisi, lewati jadwal ini
+        if ($status === '') {
+            continue;
+        }
+
         // Mengamankan ID jadwal dan pencatat
         $id_jadwal = (int)$id_jadwal;
         $dicatat_oleh = (int)$_SESSION['user']['id_pengguna'];
 
         // Menentukan status kehadiran
-        if ($status === '') {
-            $status_sql = "NULL";
-        } else {
-            $status = strtolower($status) === 'hadir' ? 'hadir' : 'tidak hadir';
-            $status_sql = "'" . mysqli_real_escape_string($conn, $status) . "'";
-        }
+        $status = strtolower($status) === 'hadir' ? 'hadir' : 'tidak hadir';
+        $status_sql = "'" . mysqli_real_escape_string($conn, $status) . "'";
 
         // Mengambil dan memproses keterangan presensi
         $keterangan_input = $_POST['keterangan'][$id_jadwal] ?? '';
@@ -69,6 +70,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['status'])) {
         // Menjalankan query simpan/update presensi
         mysqli_query($conn, $sql);
     }
+
 
     // Pesan sukses setelah semua presensi diproses
     $message = "Presensi berhasil disimpan!";

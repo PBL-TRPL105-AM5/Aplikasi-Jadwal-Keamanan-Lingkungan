@@ -37,14 +37,14 @@ $hariNama = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
 
         <!-- Form pilih tanggal -->
         <form method="get" class="mb-3">
-            <div class="row align-items-center">
+            <div class="row align-items-end">
                 <div class="col-md-4">
                     <label class="form-label">Pilih Tanggal Mulai</label>
                     <input type="date" name="mulai" class="form-control"
                         value="<?= htmlspecialchars($tanggal_mulai) ?>" required>
                 </div>
 
-                <div class="col-md-3 mt-3 mt-md-0">
+                <div class="col-md-5 d-flex gap-2">
                     <button type="submit" class="btn btn-primary">
                         <i class="fas fa-calendar-alt"></i> Tampilkan
                     </button>

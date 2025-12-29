@@ -39,41 +39,30 @@ function togglePass(id, el) {
 }
 
 // Fungsi untuk menampilkan jam dan tanggal realtime di navbar
-function updateJam() {
-
-    // Ambil elemen jam
-    const jamEl = document.getElementById('tanggalJam');
-    if (!jamEl) return;
-
-    // Ambil waktu saat ini
+function updateTanggalJamNavbar() {
     const now = new Date();
 
-    // Format hari (Indonesia)
-    const hari = now.toLocaleDateString('id-ID', { weekday: 'long' });
+    const options = {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+    };
 
-    // Format tanggal
-    const tanggal = now.toLocaleDateString('id-ID', {
-        day: '2-digit',
-        month: 'short',
-        year: 'numeric'
-    });
+    const tanggal = now.toLocaleDateString('id-ID', options);
+    const jam = now.toLocaleTimeString('id-ID');
 
-    // Format jam
-    const jam = now.toLocaleTimeString('id-ID', {
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit'
-    });
-
-    // Tampilkan ke halaman
-    jamEl.innerText = `${hari}, ${tanggal} | ${jam} WIB`;
+    const el = document.getElementById('tanggalJamNavbar');
+    if (el) {
+        el.innerHTML = ` ${tanggal}, ${jam}`;
+    }
 }
 
-// Jalankan jam pertama kali
-updateJam();
+// Set awal
+updateTanggalJamNavbar();
 
-// Update jam setiap 1 detik
-setInterval(updateJam, 1000);
+// Update tiap 1 detik
+setInterval(updateTanggalJamNavbar, 1000);
 </script>
 
 </body>
