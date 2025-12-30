@@ -88,7 +88,7 @@ if (isset($_SESSION['user'])) {
           <img src="assets/img/LOGO_Prod_TRPL_Variant_03_Horizontal_Black-removebg-preview.png" style="height:44px;">
         </div>
 
-        <h2 class="fw-bold mb-3" style="font-size:1.8rem;">About Us</h2>
+        <h2 class="fw-bold mb-3" style="font-size:1.8rem;">Tentang Kami</h2>
         <p class="mb-0 about-text">
           Siskamling adalah solusi revolusioner yang mengubah cara lingkungan Anda menjaga keamanan malam hari—bayangkan jadwal ronda yang adil dan otomatis, tanpa lagi ribut soal giliran, lengkap dengan pengingat langsung ke ponsel warga agar tak ada yang lupa tugas. Dengan fitur presensi instan, rekap kehadiran yang detail, dan catatan insiden yang mudah dilacak, pengurus bisa memantau semuanya dari satu dasbor, menghindari kekacauan dan memastikan keamanan maksimal. Plus, laporan bulanan dengan grafik visual yang tajam membuat analisis jadi lebih mudah daripada minum kopi pagi—bergabunglah sekarang dan buat ronda malam jadi lebih efisien, aman, dan bebas drama untuk komunitas Anda!
         </p>
@@ -106,17 +106,45 @@ if (isset($_SESSION['user'])) {
 <section id="schedule" class="schedule-section">
   <div class="schedule-inner">
     <div class="container text-center">
-      <h2 class="schedule-title">Today's Schedule</h2>
+
+      <!-- Judul diganti -->
+      <h2 class="schedule-title">Jadwal Seminggu</h2>
 
       <div class="row g-4 justify-content-center schedule-grid">
         <?php
+        // array hari & bulan Indonesia
+        $hariIndo = [
+          'Sunday' => 'Minggu',
+          'Monday' => 'Senin',
+          'Tuesday' => 'Selasa',
+          'Wednesday' => 'Rabu',
+          'Thursday' => 'Kamis',
+          'Friday' => 'Jumat',
+          'Saturday' => 'Sabtu'
+        ];
+
+        $bulanIndo = [
+          'January' => 'Januari',
+          'February' => 'Februari',
+          'March' => 'Maret',
+          'April' => 'April',
+          'May' => 'Mei',
+          'June' => 'Juni',
+          'July' => 'Juli',
+          'August' => 'Agustus',
+          'September' => 'September',
+          'October' => 'Oktober',
+          'November' => 'November',
+          'December' => 'Desember'
+        ];
+
         // tanggal hari ini
         $today = date('Y-m-d');
 
-        // cari SENIN minggu ini
+        // cari Senin minggu ini
         $monday = date('Y-m-d', strtotime('monday this week'));
 
-        // ambil semua jadwal dalam 1 minggu (Senin–Minggu)
+        // ambil jadwal 1 minggu
         $jadwal = [];
         $qJadwal = mysqli_query($conn, "
           SELECT j.tanggal_tugas, p.nama_pengguna
@@ -129,10 +157,13 @@ if (isset($_SESSION['user'])) {
           $jadwal[$row['tanggal_tugas']][] = $row['nama_pengguna'];
         }
 
-        // loop 7 hari (Senin → Minggu)
+        // loop Senin - Minggu
         for ($i = 0; $i < 7; $i++):
           $date = date('Y-m-d', strtotime("$monday +$i day"));
           $isToday = ($date === $today);
+
+          $hari = $hariIndo[date('l', strtotime($date))];
+          $bulan = $bulanIndo[date('F', strtotime($date))];
         ?>
         <div class="col-md-4">
           <div class="schedule-glass <?= $isToday ? 'schedule-glass-dark' : '' ?>">
@@ -156,7 +187,7 @@ if (isset($_SESSION['user'])) {
                 <i class="fa-regular fa-clock"></i>
               </span>
               <span style="white-space:nowrap;">
-                <?= date('l | d F', strtotime($date)); ?>
+                <?= "$hari | " . date('d', strtotime($date)) . " $bulan"; ?>
                 <small><?= date('Y', strtotime($date)); ?></small>
               </span>
             </div>
@@ -170,11 +201,12 @@ if (isset($_SESSION['user'])) {
   </div>
 </section>
 
+
 <!-- INCIDENT REPORT -->
 <section id="incident" class="incident-section">
   <div class="incident-inner">
     <div class="container">
-      <h2 class="incident-title">Incident Report</h2>
+      <h2 class="incident-title">Laporan Insiden</h2>
 
       <?php
       $qInsiden = mysqli_query($conn,"
@@ -255,7 +287,9 @@ if (isset($_SESSION['user'])) {
   </div>
 </section>
 
-
+<footer class="fixed-bottom bg-light text-center py-2 small text-muted">
+    © <?= date('Y') ?> PBL-TRPL105-AM5 — Aplikasi Jadwal Keamanan Lingkungan
+</footer>
 
 </body>
 </html>
