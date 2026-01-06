@@ -1,32 +1,35 @@
 <?php
 include '../config/config.php';
 
-// Mengecek apakah user sudah login
+/* ================= TIMEZONE WIB ================= */
+date_default_timezone_set('Asia/Jakarta');
+
+// ================= CEK LOGIN =================
 if (!isset($_SESSION['user'])) {
     header("Location: ../login.php");
     exit;
 }
 
-// Mengambil data user dari session
+// ================= USER LOGIN =================
 $user = $_SESSION['user'];
 $id_pengguna = $user['id_pengguna'];
 
-// Menentukan judul halaman dashboard petugas
+// ================= JUDUL HALAMAN =================
 $page_title = "Dashboard Petugas | Siskamling";
 
-// Memanggil template header dan sidebar
 include '../templates/header.php';
 include '../templates/sidebar.php';
 
-// Mengambil total jadwal petugas pada bulan berjalan
+// ================= STATISTIK =================
 $bulan = date('Y-m');
+
 $jadwal_bulan = mysqli_fetch_assoc(mysqli_query($conn,"
-    SELECT COUNT(*) AS total FROM tb_jadwal
+    SELECT COUNT(*) AS total 
+    FROM tb_jadwal
     WHERE id_pengguna = '$id_pengguna'
-    AND DATE_FORMAT(tanggal_tugas,'%Y-%m') = '$bulan'
+      AND DATE_FORMAT(tanggal_tugas,'%Y-%m') = '$bulan'
 "))['total'];
 
-// Mengambil total kehadiran petugas
 $hadir = mysqli_fetch_assoc(mysqli_query($conn,"
     SELECT COUNT(*) AS total 
     FROM tb_presensi pr
@@ -35,25 +38,25 @@ $hadir = mysqli_fetch_assoc(mysqli_query($conn,"
       AND pr.status = 'hadir'
 "))['total'];
 
-// Mengambil total insiden yang dicatat oleh petugas
 $insiden = mysqli_fetch_assoc(mysqli_query($conn,"
-    SELECT COUNT(*) AS total FROM tb_insiden
+    SELECT COUNT(*) AS total 
+    FROM tb_insiden
     WHERE id_pengguna = '$id_pengguna'
 "))['total'];
 
-// Mengambil satu jadwal terdekat yang belum dimulai
+// ================= JADWAL TERDEKAT =================
 $next_one = mysqli_fetch_assoc(mysqli_query($conn,"
-    SELECT *, CONCAT(tanggal_tugas,' ',jam_mulai) AS mulai 
+    SELECT *, CONCAT(tanggal_tugas,' ',jam_mulai) AS mulai
     FROM tb_jadwal
     WHERE id_pengguna='$id_pengguna'
-      AND CONCAT(tanggal_tugas, ' ', jam_mulai) >= NOW()
+      AND CONCAT(tanggal_tugas,' ',jam_mulai) >= NOW()
     ORDER BY tanggal_tugas ASC, jam_mulai ASC
     LIMIT 1
 "));
 
-// Mengambil riwayat presensi terakhir petugas
+// ================= RIWAYAT PRESENSI =================
 $riwayat = mysqli_query($conn,"
-    SELECT j.tanggal_tugas, pr.status 
+    SELECT j.tanggal_tugas, pr.status
     FROM tb_presensi pr
     JOIN tb_jadwal j ON pr.id_jadwal = j.id_jadwal
     WHERE j.id_pengguna = '$id_pengguna'
@@ -71,11 +74,10 @@ $riwayat = mysqli_query($conn,"
     display:flex;
     align-items:center;
     justify-content:center;
-    margin:0 auto 10px;
 }
 .schedule-item {
-    padding: 12px;
-    border-left: 4px solid #3498db;
+    padding: 14px;
+    border-left: 4px solid #0d6efd;
     background:#f8f9fa;
     border-radius:6px;
 }
@@ -93,112 +95,98 @@ $riwayat = mysqli_query($conn,"
 
     <h1 class="h3 mb-4">Dashboard Petugas</h1>
 
-    <!-- Menampilkan statistik utama petugas -->
+    <!-- STATISTIK -->
     <div class="row g-3 mb-4">
-
         <div class="col-md-4">
-            <div class="p-3 bg-white shadow-sm rounded">
-                <div class="d-flex align-items-center gap-3">
-                    <i class="fa fa-calendar text-primary" style="font-size:26px;"></i>
-                    <div>
-                        <div class="fw-bold fs-5 text-primary">
-                            <?= $jadwal_bulan ?>
-                        </div>
-                        <div class="text-muted small">
-                            Jadwal Bulan Ini
-                        </div>
-                    </div>
+            <div class="p-3 bg-white shadow-sm rounded d-flex gap-3 align-items-center">
+                <i class="fa fa-calendar text-primary fs-3"></i>
+                <div>
+                    <div class="fw-bold fs-5"><?= $jadwal_bulan ?></div>
+                    <div class="text-muted small">Jadwal Bulan Ini</div>
                 </div>
             </div>
         </div>
 
         <div class="col-md-4">
-            <div class="p-3 bg-white shadow-sm rounded">
-                <div class="d-flex align-items-center gap-3">
-                    <i class="fa fa-check-circle text-success" style="font-size:26px;"></i>
-                    <div>
-                        <div class="fw-bold fs-5 text-success">
-                            <?= $hadir ?>/<?= $jadwal_bulan ?>
-                        </div>
-                        <div class="text-muted small">
-                            Kehadiran
-                        </div>
-                    </div>
+            <div class="p-3 bg-white shadow-sm rounded d-flex gap-3 align-items-center">
+                <i class="fa fa-check-circle text-success fs-3"></i>
+                <div>
+                    <div class="fw-bold fs-5"><?= $hadir ?>/<?= $jadwal_bulan ?></div>
+                    <div class="text-muted small">Kehadiran</div>
                 </div>
             </div>
         </div>
 
         <div class="col-md-4">
-            <div class="p-3 bg-white shadow-sm rounded">
-                <div class="d-flex align-items-center gap-3">
-                    <i class="fa fa-flag text-warning" style="font-size:26px;"></i>
-                    <div>
-                        <div class="fw-bold fs-5 text-warning">
-                            <?= $insiden ?>
-                        </div>
-                        <div class="text-muted small">
-                            Insiden Dicatat
-                        </div>
-                    </div>
+            <div class="p-3 bg-white shadow-sm rounded d-flex gap-3 align-items-center">
+                <i class="fa fa-flag text-warning fs-3"></i>
+                <div>
+                    <div class="fw-bold fs-5"><?= $insiden ?></div>
+                    <div class="text-muted small">Insiden Dicatat</div>
                 </div>
             </div>
         </div>
-
     </div>
 
     <div class="row g-4">
 
-        <!-- Menampilkan jadwal ronda terdekat beserta hitung mundur -->
+        <!-- JADWAL TERDEKAT + COUNTDOWN -->
         <div class="col-lg-8">
             <div class="p-4 bg-white shadow-sm rounded">
-
                 <h5 class="mb-3"><i class="bi bi-clock-history"></i> Jadwal Ronda Terdekat</h5>
 
                 <?php if ($next_one): ?>
 
                     <div class="schedule-item mb-3">
-                        <div class="schedule-title">Ronda Malam Berikutnya</div>
-                        <div class="schedule-info mt-2">
-                            <div>
-                                <i class="bi bi-calendar3"></i> 
-                                <?= date("d M Y", strtotime($next_one['tanggal_tugas'])) ?>
+                        <div class="schedule-title">Ronda Berikutnya</div>
+                        <div class="mt-2">
+                            <div><i class="bi bi-calendar3"></i>
+                                <?= date('d M Y', strtotime($next_one['tanggal_tugas'])) ?>
                             </div>
-                            <div>
-                                <i class="bi bi-clock"></i> 
+                            <div><i class="bi bi-clock"></i>
                                 <?= substr($next_one['jam_mulai'],0,5) ?> WIB
                             </div>
                         </div>
                     </div>
 
-                    <?php $target = $next_one['mulai']; ?>
+                    <?php
+                    $target = date(
+                        'Y-m-d H:i:s',
+                        strtotime($next_one['tanggal_tugas'].' '.$next_one['jam_mulai'])
+                    );
+                    ?>
 
-                    <div class="countdown-box p-3 mt-3 text-center bg-light border rounded">
-                        <h6 class="mb-1 text-muted">Hitung Mundur</h6>
+                    <div class="countdown-box p-3 text-center bg-light border rounded">
+                        <h6 class="mb-1 text-muted">Hitung Mundur Mulai Bertugas</h6>
                         <div id="countdown" class="text-primary">Memuat...</div>
                     </div>
 
                     <script>
-                        const target = new Date("<?= $target ?>").getTime();
+                        const targetTime = new Date("<?= $target ?>".replace(" ", "T")).getTime();
+                        const countdownEl = document.getElementById("countdown");
 
-                        setInterval(function() {
+                        const timer = setInterval(() => {
                             const now = new Date().getTime();
-                            const distance = target - now;
+                            const distance = targetTime - now;
 
                             if (distance <= 0) {
-                                document.getElementById("countdown").innerHTML =
-                                    "<span class='text-success fw-bold'>Sedang Berlangsung ⚡</span>";
+                                clearInterval(timer);
+                                countdownEl.innerHTML =
+                                    "<span class='text-success'>Sedang Bertugas ⚡</span>";
                                 return;
                             }
 
-                            const d = Math.floor(distance / (1000*60*60*24));
-                            const h = Math.floor((distance%(1000*60*60*24))/(1000*60*60));
-                            const m = Math.floor((distance%(1000*60*60))/(1000*60));
-                            const s = Math.floor((distance%(1000*60))/1000);
+                            const hari  = Math.floor(distance / (1000*60*60*24));
+                            const jam   = Math.floor((distance % (1000*60*60*24)) / (1000*60*60));
+                            const menit = Math.floor((distance % (1000*60*60)) / (1000*60));
+                            const detik = Math.floor((distance % (1000*60)) / 1000);
 
-                            document.getElementById("countdown").innerHTML =
-                                (d>0 ? d+"h " : "") + h+"j "+m+"m "+s+"d";
+                            let text = "";
+                            if (hari > 0) text += hari + " hari ";
+                            text += jam + " jam " + menit + " menit " + detik + " detik";
 
-                        },1000);
+                            countdownEl.innerHTML = text;
+                        }, 1000);
                     </script>
 
                 <?php else: ?>
@@ -210,20 +198,19 @@ $riwayat = mysqli_query($conn,"
                         <i class="bi bi-calendar3"></i> Lihat Semua Jadwal
                     </a>
                 </div>
-
             </div>
         </div>
 
-        <!-- Menu aksi cepat dan riwayat kehadiran -->
+        <!-- AKSI CEPAT & RIWAYAT -->
         <div class="col-lg-4">
 
             <div class="p-4 bg-white shadow-sm rounded mb-3">
                 <h5 class="mb-3"><i class="bi bi-lightning"></i> Aksi Cepat</h5>
 
-                <a href="../insiden/index.php" class="btn btn-danger w-100 mb-3">
+                <a href="../insiden/index.php" class="btn btn-danger w-100 mb-2">
                     <i class="bi bi-exclamation-triangle"></i> Lapor Insiden
                 </a>
-                <a href="../jadwal/index.php" class="btn btn-primary w-100 mb-3">
+                <a href="../jadwal/index.php" class="btn btn-primary w-100 mb-2">
                     <i class="bi bi-calendar-check"></i> Lihat Jadwal
                 </a>
                 <a href="../profil/index.php" class="btn btn-primary w-100">
@@ -237,16 +224,11 @@ $riwayat = mysqli_query($conn,"
                 <?php if (mysqli_num_rows($riwayat) > 0): ?>
                     <?php while ($r = mysqli_fetch_assoc($riwayat)): ?>
                         <div class="d-flex justify-content-between py-2 border-bottom">
-                            <span><b><?= date('d M', strtotime($r['tanggal_tugas'])) ?></b></span>
-
+                            <b><?= date('d M', strtotime($r['tanggal_tugas'])) ?></b>
                             <?php if ($r['status'] == 'hadir'): ?>
-                                <span class="text-success">
-                                    <i class="bi bi-check-circle-fill"></i> Hadir
-                                </span>
+                                <span class="text-success">Hadir</span>
                             <?php else: ?>
-                                <span class="text-danger">
-                                    <i class="bi bi-x-circle-fill"></i> Tidak Hadir
-                                </span>
+                                <span class="text-danger">Tidak Hadir</span>
                             <?php endif; ?>
                         </div>
                     <?php endwhile; ?>
@@ -256,7 +238,6 @@ $riwayat = mysqli_query($conn,"
             </div>
 
         </div>
-
     </div>
 
     <div class="alert alert-info mt-4">

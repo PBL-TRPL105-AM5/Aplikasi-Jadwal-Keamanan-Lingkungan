@@ -1,13 +1,33 @@
 <?php
 include '../config/config.php';
 
-// cek login
+/* ================= FUNGSI TANGGAL INDONESIA ================= */
+function tanggal_indonesia($tanggal)
+{
+    $hari = [
+        'Minggu',
+        'Senin',
+        'Selasa',
+        'Rabu',
+        'Kamis',
+        'Jumat',
+        'Sabtu'
+    ];
+
+    $timestamp = strtotime($tanggal);
+    $nama_hari = $hari[date('w', $timestamp)];
+    $tgl = date('d-m-Y', $timestamp);
+
+    return $nama_hari . ', ' . $tgl;
+}
+
+/* ================= CEK LOGIN ================= */
 if (!isset($_SESSION['user'])) {
     header("Location: ../login.php");
     exit;
 }
 
-// detail jadwal (ajax)
+/* ================= AJAX DETAIL ================= */
 if (isset($_GET['detail'])) {
     $id = intval($_GET['detail']);
 
@@ -16,7 +36,7 @@ if (isset($_GET['detail'])) {
         FROM tb_jadwal j
         LEFT JOIN tb_pengguna p ON j.id_pengguna = p.id_pengguna
         WHERE j.id_jadwal = $id
-    "); // Query ini mengambil detail jadwal dari tabel tb_jadwal dan menghubungkannya dengan tabel tb_pengguna untuk menampilkan nama petugas.
+    ");
     $jadwal = mysqli_fetch_assoc($q);
 
     $presensiQ = mysqli_query($conn, "
@@ -24,7 +44,7 @@ if (isset($_GET['detail'])) {
         FROM tb_presensi pr
         LEFT JOIN tb_pengguna u ON pr.dicatat_oleh = u.id_pengguna
         WHERE pr.id_jadwal = $id
-    "); // Query ini menampilkan data presensi yang terkait dengan jadwal tertentu berdasarkan id_jadwal, serta menampilkan nama pengguna yang mencatat presensi.
+    ");
 ?>
     <div class="modal-header bg-primary text-white">
         <h5 class="modal-title">Detail Jadwal</h5>
@@ -32,7 +52,7 @@ if (isset($_GET['detail'])) {
     </div>
 
     <div class="modal-body">
-        <p><strong>Tanggal:</strong> <?= $jadwal['tanggal_tugas'] ?></p>
+        <p><strong>Tanggal:</strong> <?= tanggal_indonesia($jadwal['tanggal_tugas']) ?></p>
         <p><strong>Petugas:</strong> <?= $jadwal['nama_pengguna'] ?></p>
         <p><strong>Jam:</strong> <?= substr($jadwal['jam_mulai'],0,5) ?> - <?= substr($jadwal['jam_selesai'],0,5) ?></p>
 
@@ -72,35 +92,58 @@ if (isset($_GET['detail'])) {
     exit;
 }
 
-// data user login
+/* ================= USER LOGIN ================= */
 $user = $_SESSION['user'];
 $role = $user['role'];
 $id_pengguna = $user['id_pengguna'];
 
-// list jadwal
+/* ================= PAGINATION ================= */
+$limit = 10;
+$page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+$page = ($page < 1) ? 1 : $page;
+$offset = ($page - 1) * $limit;
+
+/* ================= HITUNG TOTAL DATA ================= */
+$countSql = "
+    SELECT COUNT(*) AS total
+    FROM tb_jadwal
+    WHERE tanggal_tugas >= CURDATE()
+";
+
+if ($role === 'Petugas') {
+    $countSql .= " AND id_pengguna = $id_pengguna";
+}
+
+$countResult = mysqli_query($conn, $countSql);
+$totalData = mysqli_fetch_assoc($countResult)['total'];
+$totalPage = ceil($totalData / $limit);
+
+/* ================= LIST JADWAL ================= */
 $sql = "
     SELECT j.id_jadwal, j.tanggal_tugas, j.jam_mulai, j.jam_selesai,
            p.nama_pengguna, pr.status AS status_presensi
     FROM tb_jadwal j
     LEFT JOIN tb_pengguna p ON j.id_pengguna = p.id_pengguna
     LEFT JOIN tb_presensi pr ON j.id_jadwal = pr.id_jadwal
+    WHERE j.tanggal_tugas >= CURDATE()
 ";
 
 if ($role === 'Petugas') {
-    $sql .= " WHERE j.id_pengguna = $id_pengguna ";
+    $sql .= " AND j.id_pengguna = $id_pengguna ";
 }
 
-$sql .= " ORDER BY j.tanggal_tugas ASC";
+$sql .= "
+    ORDER BY j.tanggal_tugas ASC
+    LIMIT $limit OFFSET $offset
+";
 
 $result = mysqli_query($conn, $sql);
 
 $page_title = "Jadwal Ronda";
-include __DIR__ . '/../templates/header.php';
-include __DIR__ . '/../templates/sidebar.php';
+include '../templates/header.php';
+include '../templates/sidebar.php';
 ?>
 
-
-<!-- STYLE: jadwal-box sama seperti buat.php -->
 <style>
 .jadwal-box {
     background: white;
@@ -121,13 +164,12 @@ include __DIR__ . '/../templates/sidebar.php';
         </a>
     <?php endif; ?>
 
-    <!-- BOX ALIH-ALIH CARD -->
     <div class="jadwal-box">
-
         <div class="table-responsive">
             <table class="table table-bordered table-hover">
                 <thead class="table-dark text-center">
                     <tr>
+                        <th>No</th>
                         <th>Tanggal</th>
                         <th>Petugas</th>
                         <th>Jam</th>
@@ -135,42 +177,65 @@ include __DIR__ . '/../templates/sidebar.php';
                         <th width="120">Aksi</th>
                     </tr>
                 </thead>
-
                 <tbody>
-                    <?php while ($row = mysqli_fetch_assoc($result)): ?>
 
-                        <?php
-                        if ($row['status_presensi'] == 'hadir') {
-                            $badge = '<span class="badge bg-success">Hadir</span>';
-                        } elseif ($row['status_presensi'] == 'tidak hadir') {
-                            $badge = '<span class="badge bg-danger">Tidak Hadir</span>';
-                        } else {
-                            $badge = '<span class="badge bg-secondary">Belum Absen</span>';
-                        }
-                        ?>
+                <?php $no = ($page - 1) * $limit + 1; ?>
 
-                        <tr>
-                            <td><?= $row['tanggal_tugas'] ?></td>
-                            <td><?= $row['nama_pengguna'] ?></td>
-                            <td><?= substr($row['jam_mulai'],0,5) ?> - <?= substr($row['jam_selesai'],0,5) ?></td>
-                            <td class="text-center"><?= $badge ?></td>
+                <?php while ($row = mysqli_fetch_assoc($result)): ?>
 
-                            <td class="text-center">
-                                <button class="btn btn-info btn-sm btn-detail" data-id="<?= $row['id_jadwal'] ?>">
-                                    Detail
-                                </button>
-                            </td>
-                        </tr>
+                    <?php
+                    if ($row['status_presensi'] == 'hadir') {
+                        $badge = '<span class="badge bg-success">Hadir</span>';
+                    } elseif ($row['status_presensi'] == 'tidak hadir') {
+                        $badge = '<span class="badge bg-danger">Tidak Hadir</span>';
+                    } else {
+                        $badge = '<span class="badge bg-secondary">Belum Absen</span>';
+                    }
+                    ?>
+                    
 
-                    <?php endwhile; ?>
+                    <tr>
+                        <td><?= $no++ ?></td>
+                        <td><?= tanggal_indonesia($row['tanggal_tugas']) ?></td>
+                        <td><?= $row['nama_pengguna'] ?></td>
+                        <td><?= substr($row['jam_mulai'],0,5) ?> - <?= substr($row['jam_selesai'],0,5) ?></td>
+                        <td class="text-center"><?= $badge ?></td>
+                        <td class="text-center">
+                            <button class="btn btn-info btn-sm btn-detail" data-id="<?= $row['id_jadwal'] ?>">
+                                Detail
+                            </button>
+                        </td>
+                    </tr>
+
+                <?php endwhile; ?>
+
                 </tbody>
             </table>
         </div>
 
-    </div> <!-- END jadwal-box -->
+        <!-- PAGINATION -->
+        <nav>
+            <ul class="pagination justify-content-center mt-3">
 
+                <li class="page-item <?= ($page <= 1) ? 'disabled' : '' ?>">
+                    <a class="page-link" href="?page=<?= $page - 1 ?>">Previous</a>
+                </li>
+
+                <?php for ($i = 1; $i <= $totalPage; $i++): ?>
+                    <li class="page-item <?= ($i == $page) ? 'active' : '' ?>">
+                        <a class="page-link" href="?page=<?= $i ?>"><?= $i ?></a>
+                    </li>
+                <?php endfor; ?>
+
+                <li class="page-item <?= ($page >= $totalPage) ? 'disabled' : '' ?>">
+                    <a class="page-link" href="?page=<?= $page + 1 ?>">Next</a>
+                </li>
+
+            </ul>
+        </nav>
+
+    </div>
 </div>
-
 
 <!-- MODAL DETAIL -->
 <div class="modal fade" id="detailModal" tabindex="-1">
@@ -178,7 +243,6 @@ include __DIR__ . '/../templates/sidebar.php';
         <div class="modal-content" id="detailContent"></div>
     </div>
 </div>
-
 
 <?php include '../templates/footer.php'; ?>
 

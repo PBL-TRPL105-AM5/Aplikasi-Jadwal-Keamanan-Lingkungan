@@ -1,46 +1,62 @@
 <?php
+// Memanggil file konfigurasi (koneksi database, session_start, dll)
 include 'config/config.php';
 
+// Cek apakah user sudah login
+// Jika sudah ada session user, langsung arahkan ke dashboard
 if (isset($_SESSION['user'])) {
     header("Location: dashboard/index.php");
     exit;
 }
 
+// Variabel untuk menyimpan pesan error / alert
 $alert = "";
 
+// Mengecek apakah form dikirim menggunakan metode POST
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
-    $email    = trim($_POST['email']);
+    // Mengambil input email
+    $email = $_POST['email'];
+
+    // Mengambil input password
     $password = $_POST['password'];
 
+    // Query untuk mengambil data user berdasarkan email
     $sql = "SELECT id_pengguna, nama_pengguna, email, password, role 
             FROM tb_pengguna 
             WHERE email = '$email'";
+
+    // Menjalankan query ke database
     $result = mysqli_query($conn, $sql);
 
-    if (mysqli_num_rows($result) == 1) {
-        $user = mysqli_fetch_assoc($result);
+    // Cek apakah email ditemukan tepat 1 data
+if (mysqli_num_rows($result) == 1) {
 
-        if (password_verify($password, $user['password'])) {
+    // Ambil data user mengambil satu baris data hasil query MySQL dalam bentuk array asosiatif.
+    $user = mysqli_fetch_assoc($result);
 
-            $_SESSION['user'] = [
-                'id_pengguna'   => $user['id_pengguna'],
-                'nama_pengguna' => $user['nama_pengguna'],
-                'email'         => $user['email'],
-                'role'          => $user['role']
-            ];
+    // Verifikasi password
+    if (password_verify($password, $user['password'])) {
 
-            header("Location: dashboard/index.php");
-            exit;
-        }
+        // Simpan data user ke session
+        $_SESSION['user'] = [
+            'id_pengguna'   => $user['id_pengguna'],
+            'nama_pengguna' => $user['nama_pengguna'],
+            'email'         => $user['email'],
+            'role'          => $user['role']
+        ];
 
-        $alert = "Password salah!";
-    } else {
-        $alert = "Email tidak ditemukan!";
+        // Redirect ke dashboard
+        header("Location: dashboard/index.php");
+        exit;
     }
 }
-?>
 
+// Jika email tidak ditemukan ATAU password salah
+$alert = "Email atau password salah!";
+
+}
+?>
 
 <!DOCTYPE html>
 <html lang="id">
