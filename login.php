@@ -1,62 +1,60 @@
 <?php
-// Memanggil file konfigurasi (koneksi database, session_start, dll)
 include 'config/config.php';
 
-// Cek apakah user sudah login
-// Jika sudah ada session user, langsung arahkan ke dashboard
 if (isset($_SESSION['user'])) {
     header("Location: dashboard/index.php");
     exit;
 }
 
-// Variabel untuk menyimpan pesan error / alert
 $alert = "";
 
-// Mengecek apakah form dikirim menggunakan metode POST
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
-    // Mengambil input email
-    $email = $_POST['email'];
-
-    // Mengambil input password
+    // Ambil input & trim
+    $email    = trim($_POST['email']);
     $password = $_POST['password'];
 
-    // Query untuk mengambil data user berdasarkan email
-    $sql = "SELECT id_pengguna, nama_pengguna, email, password, role 
-            FROM tb_pengguna 
-            WHERE email = '$email'";
+    // Prepared Statement
+    $stmt = mysqli_prepare(
+        $conn,
+        "SELECT id_pengguna, nama_pengguna, email, password, role 
+         FROM tb_pengguna 
+         WHERE email = ? LIMIT 1"
+    );
 
-    // Menjalankan query ke database
-    $result = mysqli_query($conn, $sql);
+    // Bind parameter
+    mysqli_stmt_bind_param($stmt, "s", $email);
 
-    // Cek apakah email ditemukan tepat 1 data
-if (mysqli_num_rows($result) == 1) {
+    // Eksekusi
+    mysqli_stmt_execute($stmt);
 
-    // Ambil data user mengambil satu baris data hasil query MySQL dalam bentuk array asosiatif.
-    $user = mysqli_fetch_assoc($result);
+    // Ambil hasil
+    $result = mysqli_stmt_get_result($stmt);
 
-    // Verifikasi password
-    if (password_verify($password, $user['password'])) {
+    if ($result && mysqli_num_rows($result) === 1) {
 
-        // Simpan data user ke session
-        $_SESSION['user'] = [
-            'id_pengguna'   => $user['id_pengguna'],
-            'nama_pengguna' => $user['nama_pengguna'],
-            'email'         => $user['email'],
-            'role'          => $user['role']
-        ];
+        $user = mysqli_fetch_assoc($result);
 
-        // Redirect ke dashboard
-        header("Location: dashboard/index.php");
-        exit;
+        // Verifikasi password hash
+        if (password_verify($password, $user['password'])) {
+
+            $_SESSION['user'] = [
+                'id_pengguna'   => $user['id_pengguna'],
+                'nama_pengguna' => $user['nama_pengguna'],
+                'email'         => $user['email'],
+                'role'          => $user['role']
+            ];
+
+            header("Location: dashboard/index.php");
+            exit;
+        }
     }
-}
 
-// Jika email tidak ditemukan ATAU password salah
-$alert = "Email atau password salah!";
-
+    // Jika gagal login
+    $alert = "Email atau password salah!";
 }
 ?>
+
 
 <!DOCTYPE html>
 <html lang="id">
