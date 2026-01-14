@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Dec 28, 2025 at 03:26 PM
+-- Generation Time: Jan 14, 2026 at 09:29 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -44,8 +44,6 @@ CREATE TABLE `tb_insiden` (
 --
 
 INSERT INTO `tb_insiden` (`id_insiden`, `id_pengguna`, `timestamp`, `nama_insiden`, `deskripsi`, `status`, `catatan_admin`) VALUES
-(7, 1, '2025-12-22 19:19:46', 'Kehilangan ', 'test', 'pending', NULL),
-(8, 9, '2025-12-28 21:19:50', 'Pencurian', 'Kejadian di blok A pukul 02:00', 'diterima', 'Sudah ditangani                            ');
 
 -- --------------------------------------------------------
 
@@ -61,19 +59,6 @@ CREATE TABLE `tb_jadwal` (
   `jam_selesai` time DEFAULT '05:00:00'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Dumping data for table `tb_jadwal`
---
-
-INSERT INTO `tb_jadwal` (`id_jadwal`, `id_pengguna`, `tanggal_tugas`, `jam_mulai`, `jam_selesai`) VALUES
-(56, 4, '2025-12-24', '21:00:00', '05:00:00'),
-(57, 4, '2025-12-26', '21:00:00', '05:00:00'),
-(58, 4, '2025-12-28', '21:00:00', '05:00:00'),
-(59, 4, '2025-12-30', '21:00:00', '05:00:00'),
-(60, 4, '2025-12-25', '21:00:00', '05:00:00'),
-(61, 4, '2025-12-27', '21:00:00', '05:00:00'),
-(62, 4, '2025-12-29', '21:00:00', '05:00:00'),
-(63, 4, '2025-12-31', '21:00:00', '05:00:00');
 
 -- --------------------------------------------------------
 
@@ -89,21 +74,17 @@ CREATE TABLE `tb_pengguna` (
   `no_telp` varchar(20) DEFAULT NULL,
   `email` varchar(100) DEFAULT NULL,
   `password` varchar(200) NOT NULL,
-  `role` enum('Admin','Koordinator','Petugas') DEFAULT 'Petugas'
+  `role` enum('Admin','Koordinator','Petugas') DEFAULT 'Petugas',
+  `is_first_login` tinyint(1) DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `tb_pengguna`
 --
 
-INSERT INTO `tb_pengguna` (`id_pengguna`, `nama_pengguna`, `alamat`, `jenis_kelamin`, `no_telp`, `email`, `password`, `role`) VALUES
-(1, 'Admin', 'Jl. Merdeka No.112', 'L', '0811111111', 'admin@ronda.com', '$2y$10$o6eNYtGPmfumNw/9Do1iHePTW1.C5z4YoCnEmElY/WVi7D3Fn4Cqa', 'Admin'),
-(3, 'Koordinator', 'Jl. Merdeka No.2', 'L', '0812222222', 'koordinator@ronda.com', '$2y$10$5Edqm6ZjxkspYouTYEvnwuKCoHLrwtHy97iHjeoEMvxnKOiDHwEAq', 'Koordinator'),
-(4, 'Petugas Utama', 'Jl. Merdeka No.5', 'P', '0813333333', 'petugasutama@ronda.com', '$2y$10$57boGenh.15ygf2somM4VeKOCYsf8GswZTuRkdUh4G56EOx36ImAa', 'Petugas'),
-(9, 'Petugas 1', 'Jl. Merdeka No.10', 'L', '0813333331', 'petugas1@ronda.com', '$2y$10$50T6glzoJpraKMXkqPeGHunGOh.7717ZXmDVO8AAYnjmRPiY4lvBu', 'Petugas'),
-(10, 'Petugas 2', 'Jl. Merdeka No.11', 'P', '0813333332', 'petugas2@ronda.com', '$2y$10$IbZCDi/SyjXeO740Vb5K1OwGbyVW7PZ4lpbaO/0t./RvAdp5Gow6y', 'Petugas'),
-(11, 'Petugas 3', 'Jl. Merdeka No.12', 'L', '0813333333', 'petugas3@ronda.com', '$2y$10$mbdsGtm09V7v3GxWOFueDe7EVjcMp/ssyXDkbGAP42s9NjBVb4fr.', 'Petugas'),
-(12, 'Petugas 4', 'Jl. Merdeka No.13', 'P', '0813333334', 'petugas4@ronda.com', '$2y$10$14E/0vMMYUw0NTUBk0TvqOcvAULBIGOA5KvCyz9QAydo24YxLAD7u', 'Petugas');
+INSERT INTO `tb_pengguna` (`id_pengguna`, `nama_pengguna`, `alamat`, `jenis_kelamin`, `no_telp`, `email`, `password`, `role`, `is_first_login`) VALUES
+(1, 'Admin', 'Jl. Merdeka No.112', 'L', '0811111111', 'admin@ronda.com', '$2y$10$aspVJCZsAlRxSwntyfFq6.bJgY0vCFaXlsQL8uJSLO.pNoosustfO', 'Admin', 0),
+(3, 'Koordinator', 'Jl. Merdeka No.2', 'L', '0812222222', 'koordinator@ronda.com', '$2y$10$5Edqm6ZjxkspYouTYEvnwuKCoHLrwtHy97iHjeoEMvxnKOiDHwEAq', 'Koordinator', 1),
 
 -- --------------------------------------------------------
 
@@ -120,9 +101,9 @@ CREATE TABLE `tb_presensi` (
   `waktu_absen` datetime DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Indexes for dumped tables
---
+
+
+
 
 --
 -- Indexes for table `tb_insiden`
@@ -161,25 +142,25 @@ ALTER TABLE `tb_presensi`
 -- AUTO_INCREMENT for table `tb_insiden`
 --
 ALTER TABLE `tb_insiden`
-  MODIFY `id_insiden` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id_insiden` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- AUTO_INCREMENT for table `tb_jadwal`
 --
 ALTER TABLE `tb_jadwal`
-  MODIFY `id_jadwal` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=64;
+  MODIFY `id_jadwal` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=208;
 
 --
 -- AUTO_INCREMENT for table `tb_pengguna`
 --
 ALTER TABLE `tb_pengguna`
-  MODIFY `id_pengguna` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `id_pengguna` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
 -- AUTO_INCREMENT for table `tb_presensi`
 --
 ALTER TABLE `tb_presensi`
-  MODIFY `id_absen` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id_absen` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
 
 --
 -- Constraints for dumped tables

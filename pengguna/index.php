@@ -210,9 +210,20 @@ include __DIR__ . '/../templates/sidebar.php';
                         </div>
 
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Password</label>
-                            <input type="password" name="password" class="form-control" required>
+                            <label class="form-label">
+                                Password Awal <small class="text-muted">(sementara)</small>
+                            </label>
+
+                            <input type="text"
+                                class="form-control bg-light"
+                                value="Ronda@2026"
+                                readonly>
+
+                            <div class="form-text">
+                                Akan diminta ganti saat login pertama
+                            </div>
                         </div>
+
 
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Role</label>

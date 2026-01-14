@@ -17,9 +17,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Prepared Statement
     $stmt = mysqli_prepare(
         $conn,
-        "SELECT id_pengguna, nama_pengguna, email, password, role 
-         FROM tb_pengguna 
-         WHERE email = ? LIMIT 1"
+        "SELECT id_pengguna, nama_pengguna, email, password, role, is_first_login
+        FROM tb_pengguna 
+        WHERE email = ? LIMIT 1
+        "
     );
 
     // Bind parameter
@@ -39,11 +40,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (password_verify($password, $user['password'])) {
 
             $_SESSION['user'] = [
-                'id_pengguna'   => $user['id_pengguna'],
-                'nama_pengguna' => $user['nama_pengguna'],
-                'email'         => $user['email'],
-                'role'          => $user['role']
+                'id_pengguna'     => $user['id_pengguna'],
+                'nama_pengguna'   => $user['nama_pengguna'],
+                'email'           => $user['email'],
+                'role'            => $user['role'],
+                'is_first_login'  => $user['is_first_login']
             ];
+
 
             header("Location: dashboard/index.php");
             exit;

@@ -11,6 +11,28 @@
 <!-- Load JavaScript Bootstrap -->
 <script src="../assets/js/bootstrap.bundle.min.js"></script>
 
+<?php
+if (
+    isset($_SESSION['user']) &&
+    $_SESSION['user']['is_first_login'] == 1 &&
+    empty($_SESSION['first_login_modal_shown'])
+):
+?>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const modalEl = document.getElementById('modalFirstLogin');
+    if (modalEl) {
+        const modal = new bootstrap.Modal(modalEl);
+        modal.show();
+    }
+});
+</script>
+<?php
+$_SESSION['first_login_modal_shown'] = true;
+endif;
+?>
+
+
 <script>
 // Fungsi untuk menampilkan / menyembunyikan password
 // Digunakan pada form ganti password

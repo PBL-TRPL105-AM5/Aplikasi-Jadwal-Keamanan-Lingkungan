@@ -16,11 +16,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email     = mysqli_real_escape_string($conn, $_POST['email']);
     $role      = mysqli_real_escape_string($conn, $_POST['role']);
 
-    // Password diambil dalam bentuk asli karena akan di-hash
-    $password  = $_POST['password'];
+    // Password Difault
+    $password_default = 'Ronda@2026';
 
     // Melakukan hash password sebelum disimpan ke database
-    $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+    $hashed_password  = password_hash($password_default, PASSWORD_DEFAULT);
 
     // Query untuk menambahkan data pengguna baru
     $query = "
