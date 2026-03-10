@@ -69,7 +69,7 @@ Gunakan akun berikut untuk mencoba aplikasi:
 
 ### Admin:
   - Email: `admin@ronda.com`
-  - Password: `admin12`
+  - Password: `admin123`
 
 ### Koordinator:
   - Email: `koordinator@ronda.com`
